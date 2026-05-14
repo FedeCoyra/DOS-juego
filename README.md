@@ -1,24 +1,24 @@
-# PROGRAMACION ORIENTADA A OBJETOS 2025
-## JUEGO: DOS
-Este es un repositorio para la entrega de la evaluacion practica sobre el juego de mesa "DOS".
-Realizado para la aignatura Programación Orientada a Objetos, en la Universidad Nacional de Luján.
+# 🃏 Juego DOS — Evaluacíon Final
+### Programación Orientada a Objetos · 2025/2026
+**Universidad Nacional de Luján**
 
-## COYRA, FEDERICO
+> **Alumno:** Coyra, Federico
+> **Legajo Sistemas:** 182.939 · **Legajo Cs. de Datos:** 199.751
 
-Legajo Sistemas: 182.939
+---
+## Reglas del Juego
 
-Legajo Cs. de Datos: 199.751
+### Composición del Mazo — 108 cartas
 
+| Tipo de carta | Descripción | Cantidad |
+|---|---|---|
+| Numéricas 1, 3, 4, 5 | 4 colores × 3 copias c/u | 48 |
+| Numéricas 6, 7, 8, 9, 10 | 4 colores × 2 copias c/u | 40 |
+| Comodín # | 2 por cada color (4 colores) | 8 |
+| Comodín DOS | Sin color, valen 2 | 12 |
+| **Total** | | **108** |
 
-## Componentes del Juego
-
-108 cartas
-
-Cartas numeradas del 1 al 10 en cuatro colores: Azul, Verde, Rojo y Amarillo.
-
-Cartas Comodín DOS.
-
-Cartas Comodín #.
+**Colores:** 🔴 Rojo · 🔵 Azul · 🟢 Verde · 🟡 Amarillo
 
 
 ## Cómo se Juega
@@ -28,51 +28,156 @@ Cartas Comodín #.
 En su turno, cada jugador intenta hacer juego con las cartas de su mano respecto de las cartas de la Fila Central.
 
 
-Existen dos tipos de jugadas:
+### Desarrollo del Turno
+
+En cada turno, el jugador puede:
+
+#### Opción 1 — Hacer jugada
+
+**Juego Simple:** jugar **1 carta** de la mano cuyo número coincida con el de una carta de la Fila Central.
+
+```
+Mano: [7 ROJO]  →  Fila Central: [7 AZUL]   ✅ coinciden en número
+```
+
+**Juego Doble:** jugar **2 cartas** de la mano cuya **suma** coincida con el número de una carta de la Fila Central.
+
+```
+Mano: [3 ROJO] + [5 ROJO]  →  Fila Central: [8 VERDE]   ✅ suma = 8
+```
+
+> ⭐ **Bono Color:** si la(s) carta(s) jugada(s) coinciden además en **color** con la carta de la Fila Central, el jugador puede **bajar una carta adicional** a la Fila Central. En el juego doble, si ambas cartas coinciden en color, **todos los demás jugadores roban 1 carta** del mazo.
+
+#### Opción 2 — Robar carta
+
+Si el jugador no puede (o no quiere) hacer jugada, roba **1 carta** del mazo. Luego puede:
+- Intentar jugarla inmediatamente (jugada simple o doble).
+- Si tampoco puede, debe **bajar 1 carta** de su mano a la Fila Central y pasar el turno.
+
+#### Fin del Turno
+
+Al terminar el turno, la Fila Central siempre debe tener **al menos 2 cartas**. Si tiene menos, se reponen desde el mazo.
+
+### Cartas Especiales
+
+#### Comodín DOS 🃏
+- Vale **2** de **cualquier color**.
+- Al jugarlo, el jugador elige el color que representará.
+- Si está en la Fila Central, el jugador elige el color al usarlo.
+
+#### Comodín # 🃏
+- Vale **cualquier número del 1 al 10**.
+- El jugador elige el número al momento de tirarlo.
+- **Respeta el color** de la carta; no puede elegir color libremente.
+
+### Regla DOS ‼️
+
+> Cuando un jugador tiene **exactamente 2 cartas en su mano**, **debe anunciar "DOS!"** en voz alta.
+
+- Si otro jugador lo nota antes de que lo anuncie, el infractor recibe una **penalización de +2 cartas**.
+- Las cartas de castigo se aplican **al finalizar el turno**.
+
+### Fin de la Partida
+
+El primer jugador en **quedarse sin cartas** gana la ronda.
 
 
-**1. Juego Simple**
+## Cómo Ejecutar la Aplicación
 
-Combinar una carta de la mano con una carta de la Fila Central la cual debe ser del mismo número
+### Opción A — Partida en Red (Multijugador Real)
+
+Esta opción permite que cada jugador corra el cliente en su propia máquina y se conecten a un servidor compartido.
+
+---
+
+#### Paso 1 — Levantar el Servidor
+
+Ejecutar **una sola vez**, en la máquina que actuará como servidor:
+
+```
+ServidorDosMain
+```
+
+Aparecerán dos diálogos:
+
+| Diálogo | Valor recomendado | Descripción |
+|---|---|---|
+| **IP del servidor** | Elegir la IP de red local (ej: `192.168.1.100`) | La IP que los clientes usarán para conectarse |
+| **Puerto del servidor** | `5000` | Puerto en que escuchará el servidor RMI |
+
+> ✅ Si todo va bien, la consola mostrará: `Servidor DOS levantado en 192.168.1.100:5000`
+
+---
+
+#### Paso 2 — Conectar los Clientes
+
+Ejecutar en **cada máquina jugadora** (incluyendo la del servidor si quiere jugar):
+
+```
+ClienteDosMain
+```
+
+Aparecerán los siguientes diálogos en orden:
+
+| # | Diálogo | Jugador 1 (Host) | Jugador 2 | Jugador 3 | Jugador 4 |
+|---|---|---|---|---|---|
+| 1 | **IP del cliente** | Su propia IP | Su propia IP | Su propia IP | Su propia IP |
+| 2 | **Puerto del cliente** | `5001` | `5002` | `5003` | `5004` |
+| 3 | **IP del servidor** | `192.168.1.100` | `192.168.1.100` | `192.168.1.100` | `192.168.1.100` |
+| 4 | **Puerto del servidor** | `5000` | `5000` | `5000` | `5000` |
+| 5 | **Índice del jugador** | `0` | `1` | `2` | `3` |
+| 6 | **¿Es host?** | ✅ SÍ | ❌ NO | ❌ NO | ❌ NO |
+| 7 | **Cantidad de jugadores** | `2` / `3` / `4` | *(no aparece)* | *(no aparece)* | *(no aparece)* |
+| 8 | **Tipo de vista** | Gráfica / Consola | Gráfica / Consola | Gráfica / Consola | Gráfica / Consola |
+
+> ⚠️ **Importante:** el diálogo "¿Es host?" sólo lo debe marcar **el primer jugador** (índice 0). Este jugador es quien inicia la partida y define la cantidad de jugadores.
+
+> ⚠️ **El Jugador 1 debe conectarse último**, después de que todos los demás clientes ya estén conectados. La partida se inicia automáticamente cuando el host llama a `iniciarNuevaPartida()`.
+
+---
+
+#### Orden correcto de conexión para partida de 4 jugadores
+
+```
+1. Levantar ServidorDosMain  →  puerto 5000
+2. Conectar Cliente J3       →  índice 3, puerto 5003, NO es host
+3. Conectar Cliente J2       →  índice 2, puerto 5002, NO es host
+4. Conectar Cliente J1       →  índice 1, puerto 5001, NO es host
+5. Conectar Cliente J0       →  índice 0, puerto 5001*, SÍ es host, cantJugadores=4
+   → La partida arranca automáticamente
+```
+
+*\*En la misma máquina que el servidor, usar una IP diferente o 127.0.0.1 como IP de cliente.*
+
+---
+
+### Opción B — Partida Local (Una Sola Máquina)
+
+Para pruebas o para jugar sin red, se puede usar el launcher local que levanta todo en la misma JVM:
+
+```
+LauncherLocalMain
+```
+
+Este modo:
+- No requiere configurar IPs ni puertos.
+- Crea el modelo y el controlador directamente (sin RMI real).
+- Pide la cantidad de jugadores y sus nombres por consola o diálogos.
+- Útil para demostrar el juego localmente durante la defensa.
+
+> Para probar múltiples clientes en la misma máquina con RMI, en IntelliJ IDEA activar la opción **"Allow parallel run"** en cada configuración de ejecución.
+
+---
+
+## Configuración de Puertos
+
+| Puerto | Uso | ¿Quién lo usa? |
+|---|---|---|
+| `5000` | Servidor RMI (modelo) | `ServidorDosMain` |
+| `5001` | Cliente RMI — Jugador 0 (Host) | `ClienteDosMain` |
+| `5002` | Cliente RMI — Jugador 1 | `ClienteDosMain` |
+| `5003` | Cliente RMI — Jugador 2 | `ClienteDosMain` |
+| `5004` | Cliente RMI — Jugador 3 | `ClienteDosMain` |
 
 
-**2. Juego Doble**
-
-Usar dos cartas de la mano cuya suma coincida con el valor de una carta de la Fila Central.
-
-Si además coinciden en color, el jugador coloca una carta extra en la Fila Central (bonificación).
-
-
-
-**Final del Turno**
-
-El jugador debe reponer la Fila Central: siempre debe haber al menos dos cartas visibles.
-
-Si no puede (o no quiere) realizar jugada, roba una carta del Mazo.
-
-
-## Cartas Especiales
-
-**Comodín DOS**
-
-Puede usarse como carta de cualquier número y cualquier color.
-
-Al jugarla, el jugador elige el número y color que representará.
-
-
-**Comodín**
-
-Representa cualquier color, pero su valor es siempre #.
-
-Puede combinarse con otras cartas si coinciden en color y permiten la suma adecuada.
-
-
-**Penalización “DOS”**
-
-Cuando un jugador tiene dos cartas en la mano, debe anunciar “DOS!”.
-
-Si no lo hace y otro jugador lo nota, debe tomar dos cartas de penalización.
-
-**Fin de la Ronda**
-
-Cuando un jugador se queda sin cartas es el ganador.
+---
