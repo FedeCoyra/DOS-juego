@@ -1,0 +1,24 @@
+package Modelo;
+
+public enum EventoJuego {
+
+    PARTIDA_INICIADA,
+
+    TURNO_CAMBIADO,
+
+    CARTA_ROBADA,
+
+    JUGADA_SIMPLE,
+
+    JUGADA_DOBLE,
+
+    CARTA_BAJADA_A_CENTRAL,
+
+    TODOS_ROBARON,
+
+    JUGADOR_DIJO_DOS,
+
+    PENALIZACION_APLICADA,
+
+    GANADOR_DEFINIDO
+}
