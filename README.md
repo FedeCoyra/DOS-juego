@@ -46,7 +46,7 @@ Mano: [7 ROJO]  →  Fila Central: [7 AZUL]   ✅ coinciden en número
 Mano: [3 ROJO] + [5 ROJO]  →  Fila Central: [8 VERDE]   ✅ suma = 8
 ```
 
-> ⭐ **Bono Color:** si la(s) carta(s) jugada(s) coinciden además en **color** con la carta de la Fila Central, el jugador puede **bajar una carta adicional** a la Fila Central. En el juego doble, si ambas cartas coinciden en color, **todos los demás jugadores roban 1 carta** del mazo.
+> ⭐ **Bono Color:** si la(s) carta(s) jugada(s) coinciden además en **color** con la carta de la Fila Central, el jugador puede **bajar una carta adicional** a la Fila Central.
 
 #### Opción 2 — Robar carta
 
