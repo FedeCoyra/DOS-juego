@@ -72,7 +72,7 @@ Al terminar el turno, la Fila Central siempre debe tener **al menos 2 cartas**. 
 
 ### Regla DOS ‼️
 
-> Cuando un jugador tiene **exactamente 2 cartas en su mano**, **debe anunciar "DOS!"** en voz alta.
+> Cuando un jugador tiene **exactamente 2 cartas en su mano**, **debe anunciar "DOS!"**.
 
 - Si otro jugador lo nota antes de que lo anuncie, el infractor recibe una **penalización de +2 cartas**.
 - Las cartas de castigo se aplican **al finalizar el turno**.
@@ -84,7 +84,7 @@ El primer jugador en **quedarse sin cartas** gana la ronda.
 
 ## Cómo Ejecutar la Aplicación
 
-### Opción A — Partida en Red (Multijugador Real)
+### Partida en Red
 
 Esta opción permite que cada jugador corra el cliente en su propia máquina y se conecten a un servidor compartido.
 
@@ -130,23 +130,5 @@ Aparecerán los siguientes diálogos en orden:
 | 7 | **Cantidad de jugadores** | `2` / `3` / `4` | *(no aparece)* | *(no aparece)* | *(no aparece)* |
 | 8 | **Tipo de vista** | Gráfica / Consola | Gráfica / Consola | Gráfica / Consola | Gráfica / Consola |
 
-> ⚠️ **Importante:** el diálogo "¿Es host?" sólo lo debe marcar **el primer jugador** (índice 0). Este jugador es quien inicia la partida y define la cantidad de jugadores.
-
-> ⚠️ **El Jugador 1 debe conectarse último**, después de que todos los demás clientes ya estén conectados. La partida se inicia automáticamente cuando el host llama a `iniciarNuevaPartida()`.
-
----
-
-#### Orden correcto de conexión para partida de 4 jugadores
-
-```
-1. Levantar ServidorDosMain  →  puerto 5000
-2. Conectar Cliente J3       →  índice 3, puerto 5003, NO es host
-3. Conectar Cliente J2       →  índice 2, puerto 5002, NO es host
-4. Conectar Cliente J1       →  índice 1, puerto 5001, NO es host
-5. Conectar Cliente J0       →  índice 0, puerto 5001*, SÍ es host, cantJugadores=4
-   → La partida arranca automáticamente
-```
-
-*\*En la misma máquina que el servidor, usar una IP diferente o 127.0.0.1 como IP de cliente.*
 
 ---
