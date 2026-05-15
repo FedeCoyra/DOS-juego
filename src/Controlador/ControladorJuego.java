@@ -44,19 +44,13 @@ public class ControladorJuego implements IControladorRemoto {
     @Override
     public void actualizar(IObservableRemoto observable, Object o) throws RemoteException {
         EventoJuego evento = (o instanceof EventoJuego) ? (EventoJuego) o : null;
-
-        // Solo refrescamos la vista desde el Observer cuando NO es nuestro turno.
-        // Cuando es nuestro turno, el hilo principal ya gestiona refrescarVista()
-        // explícitamente antes de cada acción
         try {
             if (!esMiTurno()) {
                 SwingUtilities.invokeLater(this::refrescarVista);
             }
         } catch (RemoteException e) {
-            // Si falla la consulta del turno no interrumpimos el flujo del Observer
         }
 
-        // Despertar el hilo principal si el turno cambió o la partida terminó.
         if (evento == EventoJuego.TURNO_CAMBIADO || evento == EventoJuego.GANADOR_DEFINIDO) {
             try {
                 int nuevoIndice = juego.getIndiceJugadorActual();
@@ -68,7 +62,6 @@ public class ControladorJuego implements IControladorRemoto {
                     monitorTurno.notifyAll();
                 }
             } catch (RemoteException e) {
-                // Si falla la consulta, notificamos igual para no bloquear el hilo
                 synchronized (monitorTurno) {
                     if (evento == EventoJuego.GANADOR_DEFINIDO) partidaTerminada = true;
                     monitorTurno.notifyAll();
@@ -86,7 +79,6 @@ public class ControladorJuego implements IControladorRemoto {
             }
 
             inicializarPartidaSiHaceFalta();
-            // Inicializar el índice local del turno actual
             indiceTurnoActual = juego.getIndiceJugadorActual();
             refrescarVista();
 
@@ -114,7 +106,6 @@ public class ControladorJuego implements IControladorRemoto {
     }
 
     private void determinarRolAutomaticamente() throws RemoteException {
-        // Pedimos al servidor qué número de cliente somos (0 es el Host)
         indiceJugadorLocal = juego.registrarCliente();
         esHost = (indiceJugadorLocal == 0);
 
@@ -137,7 +128,7 @@ public class ControladorJuego implements IControladorRemoto {
                     juego.importarPartida(partida);
                     juego.configurarMaxJugadores(partida.getJugadores().size());
                     vista.mostrarMensaje("Partida cargada correctamente. ¡A jugar!");
-                    return; // Si cargó, salimos, no hace falta poner nombres
+                    return;
                 } catch (Exception e) {
                     vista.mostrarMensaje("No se pudo cargar. Se iniciará una nueva partida.");
                     juego.configurarMaxJugadores(cantidadJugadoresPartida);
@@ -146,11 +137,9 @@ public class ControladorJuego implements IControladorRemoto {
                 juego.configurarMaxJugadores(cantidadJugadoresPartida);
             }
         } else {
-            // Si somos clientes, le damos un segundo al host para que termine los menús de arriba
             try { Thread.sleep(1500); } catch (InterruptedException e) {}
         }
 
-        // Si la partida no está llena (es decir, no fue cargada de un archivo), nos unimos
         if (juego.getJugadores() == null || juego.getJugadores().size() < juego.getMaxJugadores()) {
             String miNombre = vista.pedirNombreJugador(indiceJugadorLocal + 1);
             juego.agregarJugador(miNombre);
@@ -165,7 +154,6 @@ public class ControladorJuego implements IControladorRemoto {
             List<Jugador> jugadores = juego.getJugadores();
             FilaCentral fila = juego.getFilaCentral();
 
-            // Si ya están todos los jugadores y se repartieron las cartas en la mesa... arrancamos!
             if (jugadores != null && jugadores.size() == juego.getMaxJugadores() && fila != null && fila.cantidadCartas() >= 2) {
                 break;
             }
@@ -181,7 +169,6 @@ public class ControladorJuego implements IControladorRemoto {
 
     private void esperarCambioDeTurno() throws RemoteException {
         synchronized (monitorTurno) {
-            // Condición de salida: es mi turno O la partida ya terminó.
             while (!partidaTerminada && indiceTurnoActual != indiceJugadorLocal) {
                 try {
                     monitorTurno.wait();
@@ -379,8 +366,6 @@ public class ControladorJuego implements IControladorRemoto {
             case JUGADA_VALIDA_CON_BONO_COLOR:
                 vista.mostrarMensaje("Jugada doble válida con bono de color.");
                 aplicarBonoColor(2);
-                // Solo hacer robar a los demás si nadie ganó durante la aplicación del bono
-                // (puede pasar que el jugador vacíe su mano al bajar la carta de bono)
                 if (!juego.hayGanador()) {
                     juego.hacerRobarUnaCartaATodosMenosActual();
                 }
@@ -409,9 +394,6 @@ public class ControladorJuego implements IControladorRemoto {
     private void manejarRobo() throws RemoteException {
         Carta robada = juego.robarCartaJugadorActual();
         if (robada == null) { vista.mostrarMensaje("No quedan cartas en el mazo."); return; }
-
-        // Refrescar antes de mostrar opciones para que la carta robada
-        // ya aparezca en la mano antes de cualquier diálogo
         refrescarVista();
         vista.mostrarCartaRobada(robada);
 

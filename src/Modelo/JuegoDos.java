@@ -64,7 +64,6 @@ public class JuegoDos extends ObservableRemoto implements IJuegoDos {
     public void agregarJugador(String nombre) throws RemoteException {
         jugadores.add(new Jugador(nombre));
 
-        // Si ya llegamos a la cantidad esperada, repartimos cartas y el juego arranca
         if (maxJugadoresEsperados > 0 && jugadores.size() == maxJugadoresEsperados) {
             mazo = new Mazo();
             descarte.clear();
