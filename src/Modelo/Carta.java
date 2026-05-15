@@ -19,10 +19,6 @@ public class Carta implements Serializable {
         return numero;
     }
 
-    public void setNumero(int numero) {
-        this.numero = numero;
-    }
-
     public ColorCarta getColor() {
         return color;
     }
@@ -33,10 +29,6 @@ public class Carta implements Serializable {
 
     public TipoCarta getTipo() {
         return tipo;
-    }
-
-    public boolean esComodin() {
-        return tipo == TipoCarta.COMODIN_NUMERO || tipo == TipoCarta.COMODIN_DOS;
     }
 
     public boolean esComodinNumero() {

@@ -29,7 +29,7 @@ public class Jugador implements Serializable {
         return dijoDos;
     }
 
-    public void setDijoDos(boolean dijoDos) {
+    void setDijoDos(boolean dijoDos) {
         this.dijoDos = dijoDos;
     }
 
@@ -55,13 +55,13 @@ public class Jugador implements Serializable {
         return mano.quitarCarta(indice);
     }
 
-    public void agregarPenalizacion(int cantidad) {
+    void agregarPenalizacion(int cantidad) {
         if (cantidad > 0) {
             this.cartasPenalizacionPendientes += cantidad;
         }
     }
 
-    public void limpiarPenalizacion() {
+    void limpiarPenalizacion() {
         this.cartasPenalizacionPendientes = 0;
     }
 

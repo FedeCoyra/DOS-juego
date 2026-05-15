@@ -2,7 +2,7 @@ package Modelo;
 
 public class ReglasDos {
 
-    public boolean puedeHacerJugadaSimple(Carta cartaMano, int numeroCentral) {
+    boolean puedeHacerJugadaSimple(Carta cartaMano, int numeroCentral) {
         if (cartaMano.esComodinNumero()) {
             // comodín numero# puede valer cualquier nioumero del 1–10
             return numeroCentral >= 1 && numeroCentral <= 10;
@@ -12,7 +12,7 @@ public class ReglasDos {
         return valorMano == numeroCentral;
     }
 
-    public boolean puedeHacerJugadaDoble(Carta c1, Carta c2, int objetivo) {
+    boolean puedeHacerJugadaDoble(Carta c1, Carta c2, int objetivo) {
         int sumaFija = 0;
         int comodinesNumero = 0;
 
@@ -38,11 +38,11 @@ public class ReglasDos {
         }
     }
 
-    public boolean hayBonoColorSimple(Carta cartaMano, ColorCarta colorCentral) {
+    boolean hayBonoColorSimple(Carta cartaMano, ColorCarta colorCentral) {
         return coincideColor(cartaMano.getColor(), colorCentral);
     }
 
-    public boolean hayBonoColorDoble(Carta c1, Carta c2, ColorCarta colorCentral) {
+    boolean hayBonoColorDoble(Carta c1, Carta c2, ColorCarta colorCentral) {
         return coincideColor(c1.getColor(), colorCentral)
                 && coincideColor(c2.getColor(), colorCentral);
     }

@@ -3,7 +3,7 @@ skinparam classAttributeIconSize 0
 skinparam packageStyle rectangle
 skinparam linetype ortho
 
-package "Framework RMI / Observer (Libreria UNLu)" {
+package "RMI / Observer" {
     interface IObservableRemoto
     interface IControladorRemoto
     class ObservableRemoto

@@ -62,7 +62,7 @@ public class Mazo implements Serializable {
         return cartas.remove(cartas.size() - 1);
     }
 
-    public void agregarCarta(Carta carta) {
+    void agregarCarta(Carta carta) {
         cartas.add(carta);
     }
 

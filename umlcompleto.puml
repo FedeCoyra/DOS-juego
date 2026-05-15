@@ -1,0 +1,408 @@
+@startuml
+skinparam classAttributeIconSize 0
+skinparam packageStyle rectangle
+skinparam linetype ortho
+skinparam nodesep 50
+skinparam ranksep 50
+
+package "Librería RMI-MVC (Externa)" {
+    interface IObservableRemoto
+    interface IControladorRemoto
+    class ObservableRemoto
+}
+
+package "Modelo" {
+
+    enum ColorCarta {
+        ROJO
+        AZUL
+        VERDE
+        AMARILLO
+        SIN_COLOR
+    }
+
+    enum TipoCarta {
+        NUMERICA
+        COMODIN_NUMERO
+        COMODIN_DOS
+    }
+
+    enum EventoJuego {
+        PARTIDA_INICIADA
+        TURNO_CAMBIADO
+        CARTA_ROBADA
+        JUGADA_SIMPLE
+        JUGADA_DOBLE
+        CARTA_BAJADA_A_CENTRAL
+        TODOS_ROBARON
+        JUGADOR_DIJO_DOS
+        PENALIZACION_APLICADA
+        GANADOR_DEFINIDO
+    }
+
+    enum ResultadoJugadaSimple {
+        JUGADA_INVALIDA
+        JUGADA_VALIDA_SIN_BONO
+        JUGADA_VALIDA_CON_BONO_COLOR
+    }
+
+    enum ResultadoJugadaDoble {
+        JUGADA_INVALIDA
+        JUGADA_VALIDA_SIN_BONO
+        JUGADA_VALIDA_CON_BONO_COLOR
+    }
+
+    class Carta <<Serializable>> {
+        - serialVersionUID : long = 1L
+        - numero : int
+        - color : ColorCarta
+        - tipo : TipoCarta
+        + Carta(int, ColorCarta, TipoCarta)
+        + getNumero() : int
+        + setNumero(int) : void
+        + getColor() : ColorCarta
+        + setColor(ColorCarta) : void
+        + getTipo() : TipoCarta
+        + esComodin() : boolean
+        + esComodinNumero() : boolean
+        + esComodinDos() : boolean
+        + toString() : String
+    }
+
+    class Mazo <<Serializable>> {
+        - serialVersionUID : long = 1L
+        - cartas : List<Carta>
+        + Mazo()
+        - generarMazoCompleto() : void
+        + barajar() : void
+        + estaVacio() : boolean
+        + robarCarta() : Carta
+        + agregarCarta(Carta) : void
+        + cantidadCartas() : int
+    }
+
+    class Mano <<Serializable>> {
+        - serialVersionUID : long = 1L
+        - cartas : List<Carta>
+        + agregarCarta(Carta) : void
+        + quitarCarta(int) : Carta
+        + getCarta(int) : Carta
+        + cantidadCartas() : int
+        + getCartas() : List<Carta>
+    }
+
+    class FilaCentral <<Serializable>> {
+        - serialVersionUID : long = 1L
+        - cartas : List<Carta>
+        + agregarCarta(Carta) : void
+        + quitarCarta(int) : Carta
+        + getCarta(int) : Carta
+        + cantidadCartas() : int
+        + getCartas() : List<Carta>
+    }
+
+    class Jugador <<Serializable>> {
+        - serialVersionUID : long = 1L
+        - nombre : String
+        - mano : Mano
+        - dijoDos : boolean
+        - cartasPenalizacionPendientes : int
+        + Jugador(String)
+        + getNombre() : String
+        + getMano() : Mano
+        + isDijoDos() : boolean
+        + setDijoDos(boolean) : void
+        + getCartasPenalizacionPendientes() : int
+        + sinCartas() : boolean
+        + tieneDosCartas() : boolean
+        + robarCarta(Carta) : void
+        + jugarCarta(int) : Carta
+        + agregarPenalizacion(int) : void
+        + limpiarPenalizacion() : void
+        + toString() : String
+    }
+
+    class ReglasDos {
+        + puedeHacerJugadaSimple(Carta, int) : boolean
+        + puedeHacerJugadaDoble(Carta, Carta, int) : boolean
+        + hayBonoColorSimple(Carta, ColorCarta) : boolean
+        + hayBonoColorDoble(Carta, Carta, ColorCarta) : boolean
+        - coincideColor(ColorCarta, ColorCarta) : boolean
+    }
+
+    class GestorPenalizacionesDos {
+        + acusarNoDijoDos(Jugador) : boolean
+        + aplicarPenalizacionPendiente(Jugador, Mazo) : void
+    }
+
+    interface IJuegoDos {
+        + iniciarNuevaPartida(int) : void
+        + iniciarNuevaPartidaConNombres(List<String>) : void
+        + getJugadores() : List<Jugador>
+        + getFilaCentral() : FilaCentral
+        + getJugadorActual() : Jugador
+        + getIndiceJugadorActual() : int
+        + getMazo() : Mazo
+        + getGanador() : Jugador
+        + hayGanador() : boolean
+        + avanzarAlSiguienteJugador() : void
+        + robarCartaJugadorActual() : Carta
+        + asegurarFilaCentralMinima() : void
+        + jugarCartaSimple(int, int, int, ColorCarta) : ResultadoJugadaSimple
+        + jugarCartaDoble(int, int, int, int, ColorCarta) : ResultadoJugadaDoble
+        + agregarCartaDeManoActualAFilaCentral(int) : void
+        + hacerRobarUnaCartaATodosMenosActual() : void
+        + jugadorActualPuedeDecirDos() : boolean
+        + jugadorActualDiceDos() : void
+        + aplicarPenalizacionNoDijoDos(int) : boolean
+        + aplicarPenalizacionPendienteFinDeTurno(int) : void
+        + exportarPartida() : PartidaGuardada
+        + importarPartida(PartidaGuardada) : void
+        + cerrarServidor() : void
+    }
+
+    class JuegoDos {
+        - mazo : Mazo
+        - descarte : List<Carta>
+        - filaCentral : FilaCentral
+        - jugadores : List<Jugador>
+        - indiceJugadorActual : int
+        - ganador : Jugador
+        - reglas : ReglasDos
+        - gestorPenalizaciones : GestorPenalizacionesDos
+        - gestorPersistencia : GestorPersistencia
+        + JuegoDos()
+        - reciclarDescarteSiEsNecesario() : void
+        - robarCarta(Jugador) : void
+        - ponerEnDescarte(Carta) : void
+        - actualizarEstadoDos(Jugador) : void
+        - registrarVictoriaSiCorresponde(Jugador) : void
+        + <<Implementación de los 22 métodos de IJuegoDos>>
+    }
+}
+
+package "Persistencia" {
+    class GestorPersistencia {
+        - CARPETA : String = "datos"
+        - ARCHIVO_RANKING : String = "datos/ranking.dat"
+        + GestorPersistencia()
+        + guardarPartida(PartidaGuardada, String) : void
+        + cargarPartida(String) : PartidaGuardada
+        + cargarRanking() : List<RegistroRanking>
+        + guardarRanking(List<RegistroRanking>) : void
+        + registrarVictoria(String) : void
+    }
+
+    class PartidaGuardada <<Serializable>> {
+        - serialVersionUID : long = 1L
+        - mazo : Mazo
+        - descarte : List<Carta>
+        - filaCentral : FilaCentral
+        - jugadores : List<Jugador>
+        - indiceJugadorActual : int
+        - ganador : Jugador
+        + PartidaGuardada(Mazo, List<Carta>, FilaCentral, List<Jugador>, int, Jugador)
+        + getMazo() : Mazo
+        + getDescarte() : List<Carta>
+        + getFilaCentral() : FilaCentral
+        + getJugadores() : List<Jugador>
+        + getIndiceJugadorActual() : int
+        + getGanador() : Jugador
+    }
+
+    class RegistroRanking <<Serializable>> {
+        - serialVersionUID : long = 1L
+        - nombreJugador : String
+        - victorias : int
+        + RegistroRanking(String, int)
+        + getNombreJugador() : String
+        + getVictorias() : int
+        + sumarVictoria() : void
+        + toString() : String
+    }
+}
+
+package "Vista" {
+    interface VistaJuego {
+        + mostrarMensaje(String) : void
+        + mostrarEstado(List<Jugador>, FilaCentral, Jugador, Jugador, int) : void
+        + pedirCantidadJugadores() : int
+        + pedirNombresJugadores(int) : List<String>
+        + preguntarSiCargarPartida() : boolean
+        + pedirNombreArchivoPartida() : String
+        + mostrarRankingTop5(List<RegistroRanking>) : void
+        + pedirOpcionTurno(Jugador) : int
+        + pedirIndiceCartaMano(Jugador) : int
+        + pedirIndiceCartaCentral(FilaCentral) : int
+        + pedirIndicesCartasDobles(Jugador) : int[]
+        + pedirIndiceCartaBono(Jugador, int, int) : int
+        + mostrarCartaRobada(Carta) : void
+        + pedirIndiceJugadorParaPenalizar(List<Jugador>) : int
+        + mostrarGanador(Jugador) : void
+        + elegirColorParaComodinDos() : ColorCarta
+        + elegirNumeroParaComodinNumero() : int
+        + preguntarSiQuiereSeguirJugandoEnTurno() : boolean
+        + preguntarSiQuiereIntentarJugadaDespuesDeRobar() : boolean
+        + pedirIndiceCartaParaAgregarAFilaCentral(Jugador) : int
+        + pedirOpcionPostRobo() : int
+        + pedirOpcionFinDePartida() : int
+    }
+
+    class VistaConsola {
+        - reader : BufferedReader
+        + VistaConsola()
+        - leerLinea() : String
+        - leerEnteroEnRango(int, int) : int
+        - leerSiNo() : boolean
+        - mostrarManoConIndices(Jugador) : void
+        - mostrarFilaCentralConIndices(FilaCentral) : void
+        - describirCarta(Carta) : String
+        + <<Implementación de todos los métodos de VistaJuego>>
+    }
+
+    class VistaSwing {
+        - COLOR_MESA : Color
+        - COLOR_BORDE_MESA : Color
+        - COLOR_UI_DARK : Color
+        - COLOR_TEXTO : Color
+        - lblTurno : JLabel
+        - lblMazo : JLabel
+        - lblJugadorLocal : JLabel
+        - panelMesa : JPanel
+        - panelCentro : JPanel
+        - panelMano : JPanel
+        - panelJugadorNorte : JPanel
+        - panelJugadorOeste : JPanel
+        - panelJugadorEste : JPanel
+        - panelEstadoSuperior : JPanel
+        + VistaSwing()
+        - configurarHeader() : void
+        - configurarMesa() : void
+        - crearZonaInferior() : JPanel
+        - crearPanelCarta(Carta, boolean) : JPanel
+        - crearPanelReversoCarta(boolean) : JPanel
+        - crearPanelJugador(String) : JPanel
+        - crearPanelJugadorVertical(String) : JPanel
+        - colorAWT(ColorCarta) : Color
+        - textoCarta(Carta) : String
+        - refrescarEstado(List<Jugador>, FilaCentral, Jugador, Jugador, int) : void
+        - refrescarJugadores(List<Jugador>, Jugador) : void
+        - cargarJugadorHorizontal(JPanel, Jugador) : void
+        - cargarJugadorVertical(JPanel, Jugador) : void
+        - crearLabelJugador(Jugador) : JLabel
+        - refrescarCentro(FilaCentral) : void
+        - refrescarMano(Jugador) : void
+        - crearContenedorCartaConIndice(Carta, int, boolean) : JPanel
+        - runOnEdt(Runnable) : void
+        - callOnEdt(Callable<T>) : T
+        - pedirEntero(String, int, int) : int
+        - pedirSiNo(String) : boolean
+        - elegirOpcion(String, String, String[]) : int
+        + <<Implementación de todos los métodos de VistaJuego>>
+    }
+}
+
+package "Controlador" {
+    class ControladorJuego {
+        - juego : IJuegoDos
+        - vista : VistaJuego
+        - indiceJugadorLocal : int = -1
+        - esHost : boolean = false
+        - cantidadJugadoresPartida : int = 2
+        - gestorPersistencia : GestorPersistencia
+        - monitorTurno : Object
+        - partidaTerminada : boolean = false
+        - indiceTurnoActual : int = -1
+        + ControladorJuego(VistaJuego)
+        + setIndiceJugadorLocal(int) : void
+        + setEsHost(boolean) : void
+        + setCantidadJugadoresPartida(int) : void
+        + setModeloRemoto(T) : void
+        + actualizar(IObservableRemoto, Object) : void
+        + iniciar() : void
+        - determinarRolAutomaticamente() : void
+        - inicializarPartidaSiHaceFalta() : void
+        - esperarCambioDeTurno() : void
+        - esMiTurno() : boolean
+        - getJugadorLocal() : Jugador
+        - refrescarVista() : void
+        - manejarTurno() : boolean
+        - manejarJugadaSimple() : boolean
+        - manejarJugadaDoble() : boolean
+        - aplicarBonoColor(int) : void
+        - manejarRobo() : void
+        - manejarDecirDos() : void
+        - manejarAcusacion() : void
+        - guardarPartida() : void
+        - manejarPostPartida() : void
+    }
+}
+
+package "Main / Lanzadores" {
+    class ClienteDosMain {
+        + main(String[]) : void
+    }
+
+    class ServidorDosMain {
+        + main(String[]) : void
+    }
+}
+
+' ==========================================
+' RELACIONES DE HERENCIA E IMPLEMENTACIÓN
+' ==========================================
+IObservableRemoto <|-- IJuegoDos
+IJuegoDos <|.. JuegoDos
+ObservableRemoto <|-- JuegoDos
+IControladorRemoto <|.. ControladorJuego
+VistaJuego <|.. VistaConsola
+VistaJuego <|.. VistaSwing
+
+' ==========================================
+' RELACIONES DE COMPOSICIÓN Y AGREGACIÓN
+' ==========================================
+JuegoDos *-- "1" Mazo
+JuegoDos *-- "1" FilaCentral
+JuegoDos *-- "*" Jugador
+JuegoDos o-- "*" Carta : descarte
+JuegoDos --> "1" ReglasDos
+JuegoDos --> "1" GestorPenalizacionesDos
+JuegoDos --> "1" GestorPersistencia
+
+Jugador *-- "1" Mano
+Mazo o-- "*" Carta
+Mano o-- "*" Carta
+FilaCentral o-- "*" Carta
+
+Carta --> "1" ColorCarta
+Carta --> "1" TipoCarta
+
+' ==========================================
+' RELACIONES DEL CONTROLADOR
+' ==========================================
+ControladorJuego --> "1" IJuegoDos
+ControladorJuego --> "1" VistaJuego
+ControladorJuego --> "1" GestorPersistencia
+
+' ==========================================
+' RELACIONES DE PERSISTENCIA
+' ==========================================
+GestorPersistencia ..> PartidaGuardada : lee/escribe
+GestorPersistencia ..> RegistroRanking : lee/escribe
+
+PartidaGuardada --> "1" Mazo
+PartidaGuardada --> "1" FilaCentral
+PartidaGuardada --> "*" Jugador
+PartidaGuardada --> "*" Carta : descarte
+PartidaGuardada --> "1" Jugador : ganador
+
+' ==========================================
+' RELACIONES DE USO DE MAIN
+' ==========================================
+ClienteDosMain ..> ControladorJuego : instancia
+ClienteDosMain ..> VistaConsola : instancia
+ClienteDosMain ..> VistaSwing : instancia
+
+ServidorDosMain ..> JuegoDos : instancia
+
+@enduml
