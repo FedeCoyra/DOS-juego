@@ -21,7 +21,6 @@ public class ControladorJuego implements IControladorRemoto {
     private int cantidadJugadoresPartida = 2;
     private final GestorPersistencia gestorPersistencia = new GestorPersistencia();
     private final Object monitorTurno = new Object();
-    // Flag que se activa cuando el modelo notifica GANADOR_DEFINIDO.
     private volatile boolean partidaTerminada = false;
     private volatile int indiceTurnoActual = -1;
     public ControladorJuego(VistaJuego vista) {
@@ -115,57 +114,59 @@ public class ControladorJuego implements IControladorRemoto {
     }
 
     private void determinarRolAutomaticamente() throws RemoteException {
-        List<Jugador> jugadoresActuales = juego.getJugadores();
-        int yaConectados = (jugadoresActuales == null) ? 0 : jugadoresActuales.size();
-
-        indiceJugadorLocal = yaConectados;
-        esHost = (yaConectados == 0);
+        // Pedimos al servidor qué número de cliente somos (0 es el Host)
+        indiceJugadorLocal = juego.registrarCliente();
+        esHost = (indiceJugadorLocal == 0);
 
         if (esHost) {
             cantidadJugadoresPartida = vista.pedirCantidadJugadores();
-            vista.mostrarMensaje("Sos el host (Jugador 0). Esperando que se conecten los demás...");
+            vista.mostrarMensaje("Sos el host de la partida.");
         } else {
-            vista.mostrarMensaje("Te conectaste como Jugador " + indiceJugadorLocal + ". Esperando al host...");
+            vista.mostrarMensaje("Te conectaste exitosamente a la sala.");
         }
     }
 
     private void inicializarPartidaSiHaceFalta() throws RemoteException {
         if (esHost) {
-            try {
-                Thread.sleep(1500);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                return;
-            }
+            boolean cargar = vista.preguntarSiCargarPartida();
 
-            List<Jugador> jugadores = juego.getJugadores();
-            if (jugadores == null || jugadores.isEmpty()) {
-                boolean cargar = vista.preguntarSiCargarPartida();
-
-                if (cargar) {
-                    try {
-                        String archivo = vista.pedirNombreArchivoPartida();
-                        PartidaGuardada partida = gestorPersistencia.cargarPartida(archivo);
-                        juego.importarPartida(partida);
-                        vista.mostrarMensaje("Partida cargada correctamente.");
-                    } catch (Exception e) {
-                        vista.mostrarMensaje("No se pudo cargar la partida. Se iniciará una nueva.");
-                        List<String> nombres = vista.pedirNombresJugadores(cantidadJugadoresPartida);
-                        juego.iniciarNuevaPartidaConNombres(nombres);
-                    }
-                } else {
-                    List<String> nombres = vista.pedirNombresJugadores(cantidadJugadoresPartida);
-                    juego.iniciarNuevaPartidaConNombres(nombres);
+            if (cargar) {
+                try {
+                    String archivo = vista.pedirNombreArchivoPartida();
+                    PartidaGuardada partida = gestorPersistencia.cargarPartida(archivo);
+                    juego.importarPartida(partida);
+                    juego.configurarMaxJugadores(partida.getJugadores().size());
+                    vista.mostrarMensaje("Partida cargada correctamente. ¡A jugar!");
+                    return; // Si cargó, salimos, no hace falta poner nombres
+                } catch (Exception e) {
+                    vista.mostrarMensaje("No se pudo cargar. Se iniciará una nueva partida.");
+                    juego.configurarMaxJugadores(cantidadJugadoresPartida);
                 }
+            } else {
+                juego.configurarMaxJugadores(cantidadJugadoresPartida);
+            }
+        } else {
+            // Si somos clientes, le damos un segundo al host para que termine los menús de arriba
+            try { Thread.sleep(1500); } catch (InterruptedException e) {}
+        }
+
+        // Si la partida no está llena (es decir, no fue cargada de un archivo), nos unimos
+        if (juego.getJugadores() == null || juego.getJugadores().size() < juego.getMaxJugadores()) {
+            String miNombre = vista.pedirNombreJugador(indiceJugadorLocal + 1);
+            juego.agregarJugador(miNombre);
+
+            if (juego.getJugadores().size() < juego.getMaxJugadores()) {
+                vista.mostrarMensaje("Esperando a que se unan los demás jugadores...");
             }
         }
 
-        // Esperar a que la partida esté lista (host la inicializa, no-host espera).
+        // Bucle de Sala de Espera: Esperar a que la partida esté lista para arrancar
         while (true) {
             List<Jugador> jugadores = juego.getJugadores();
             FilaCentral fila = juego.getFilaCentral();
 
-            if (jugadores != null && !jugadores.isEmpty() && fila != null && fila.cantidadCartas() >= 2) {
+            // Si ya están todos los jugadores y se repartieron las cartas en la mesa... arrancamos!
+            if (jugadores != null && jugadores.size() == juego.getMaxJugadores() && fila != null && fila.cantidadCartas() >= 2) {
                 break;
             }
 
@@ -393,6 +394,7 @@ public class ControladorJuego implements IControladorRemoto {
         if (jugadorLocal == null) { vista.mostrarMensaje("No se pudo identificar al jugador local."); return; }
 
         for (int i = 1; i <= cantidadBonos; i++) {
+            refrescarVista();
             if (jugadorLocal.getMano().cantidadCartas() == 0) { vista.mostrarMensaje("No tenés más cartas para el bono."); break; }
             int idx = vista.pedirIndiceCartaBono(jugadorLocal, i, cantidadBonos);
             if (idx < 0) { vista.mostrarMensaje("Selección inválida para bono."); break; }

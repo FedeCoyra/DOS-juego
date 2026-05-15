@@ -17,7 +17,7 @@ public interface VistaJuego {
 
     int pedirCantidadJugadores();
 
-    List<String> pedirNombresJugadores(int cantidadJugadores);
+    String pedirNombreJugador(int numeroJugador);
 
     boolean preguntarSiCargarPartida();
 

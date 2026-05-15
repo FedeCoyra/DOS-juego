@@ -61,41 +61,6 @@ public class ClienteDosMain {
         );
         if (portServidorStr == null) return;
 
-        String indiceStr = (String) JOptionPane.showInputDialog(
-                null,
-                "Ingrese el índice de este jugador (0, 1, 2, 3...)",
-                "Índice del jugador",
-                JOptionPane.QUESTION_MESSAGE,
-                null,
-                null,
-                0
-        );
-        if (indiceStr == null) return;
-
-        int esHostResp = JOptionPane.showConfirmDialog(
-                null,
-                "¿Este jugador es el host de la partida?",
-                "¿Es host?",
-                JOptionPane.YES_NO_OPTION
-        );
-        if (esHostResp == JOptionPane.CLOSED_OPTION) return;
-        boolean esHost = (esHostResp == JOptionPane.YES_OPTION);
-
-
-        int cantJugadores = 2;
-        if (esHost) {
-            String cantJugadoresStr = (String) JOptionPane.showInputDialog(
-                    null,
-                    "Cantidad total de jugadores en la partida (2 a 4)",
-                    "Cantidad de jugadores",
-                    JOptionPane.QUESTION_MESSAGE,
-                    null,
-                    null,
-                    2
-            );
-            if (cantJugadoresStr == null) return;
-            cantJugadores = Integer.parseInt(cantJugadoresStr.trim());
-        }
 
         String[] opcionesVista = {"Gráfica", "Consola"};
         int vistaResp = JOptionPane.showOptionDialog(
@@ -113,7 +78,6 @@ public class ClienteDosMain {
 
         int puertoCliente  = Integer.parseInt(portClienteStr.trim());
         int puertoServidor = Integer.parseInt(portServidorStr.trim());
-        int indiceJugador  = Integer.parseInt(indiceStr.trim());
 
         VistaJuego vista;
         if (usarSwing) {
@@ -125,9 +89,7 @@ public class ClienteDosMain {
         }
 
         ControladorJuego controlador = new ControladorJuego(vista);
-        controlador.setIndiceJugadorLocal(indiceJugador);
-        controlador.setEsHost(esHost);
-        controlador.setCantidadJugadoresPartida(cantJugadores);
+        controlador.setIndiceJugadorLocal(-1);
 
         Cliente cliente = new Cliente(ipCliente, puertoCliente, ipServidor, puertoServidor);
 

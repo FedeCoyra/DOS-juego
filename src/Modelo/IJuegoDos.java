@@ -64,4 +64,12 @@ public interface IJuegoDos extends IObservableRemoto {
     void importarPartida(PartidaGuardada partida) throws RemoteException;
 
     void cerrarServidor() throws RemoteException;
+
+    int registrarCliente() throws RemoteException;
+
+    void configurarMaxJugadores(int max) throws RemoteException;
+
+    int getMaxJugadores() throws RemoteException;
+
+    void agregarJugador(String nombre) throws RemoteException;
 }

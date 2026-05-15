@@ -396,17 +396,13 @@ public class VistaSwing extends JFrame implements VistaJuego {
     }
 
     @Override
-    public List<String> pedirNombresJugadores(int cantidadJugadores) {
+    public String pedirNombreJugador(int numeroJugador) {
         return callOnEdt(() -> {
-            List<String> nombres = new ArrayList<>();
-            for (int i = 0; i < cantidadJugadores; i++) {
-                String nombre;
-                do {
-                    nombre = JOptionPane.showInputDialog(this, "Nombre del jugador " + (i + 1) + ":");
-                } while (nombre == null || nombre.trim().isEmpty());
-                nombres.add(nombre.trim());
-            }
-            return nombres;
+            String nombre;
+            do {
+                nombre = JOptionPane.showInputDialog(this, "Ingrese su nombre (Jugador " + numeroJugador + "):");
+            } while (nombre == null || nombre.trim().isEmpty());
+            return nombre.trim();
         });
     }
 

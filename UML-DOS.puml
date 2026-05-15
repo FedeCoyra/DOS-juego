@@ -2,10 +2,10 @@
 skinparam classAttributeIconSize 0
 skinparam packageStyle rectangle
 skinparam linetype ortho
-skinparam nodesep 50
-skinparam ranksep 50
+skinparam nodesep 60
+skinparam ranksep 60
 
-package "Librería RMI-MVC (Externa)" {
+package "RMI-MVC" {
     interface IObservableRemoto
     interface IControladorRemoto
     class ObservableRemoto
@@ -27,31 +27,6 @@ package "Modelo" {
         COMODIN_DOS
     }
 
-    enum EventoJuego {
-        PARTIDA_INICIADA
-        TURNO_CAMBIADO
-        CARTA_ROBADA
-        JUGADA_SIMPLE
-        JUGADA_DOBLE
-        CARTA_BAJADA_A_CENTRAL
-        TODOS_ROBARON
-        JUGADOR_DIJO_DOS
-        PENALIZACION_APLICADA
-        GANADOR_DEFINIDO
-    }
-
-    enum ResultadoJugadaSimple {
-        JUGADA_INVALIDA
-        JUGADA_VALIDA_SIN_BONO
-        JUGADA_VALIDA_CON_BONO_COLOR
-    }
-
-    enum ResultadoJugadaDoble {
-        JUGADA_INVALIDA
-        JUGADA_VALIDA_SIN_BONO
-        JUGADA_VALIDA_CON_BONO_COLOR
-    }
-
     class Carta <<Serializable>> {
         - serialVersionUID : long = 1L
         - numero : int
@@ -59,7 +34,6 @@ package "Modelo" {
         - tipo : TipoCarta
         + Carta(int, ColorCarta, TipoCarta)
         + getNumero() : int
-        + setNumero(int) : void
         + getColor() : ColorCarta
         + setColor(ColorCarta) : void
         + getTipo() : TipoCarta
@@ -77,7 +51,7 @@ package "Modelo" {
         + barajar() : void
         + estaVacio() : boolean
         + robarCarta() : Carta
-        + agregarCarta(Carta) : void
+        ~ agregarCarta(Carta) : void
         + cantidadCartas() : int
     }
 
@@ -88,7 +62,6 @@ package "Modelo" {
         + quitarCarta(int) : Carta
         + getCarta(int) : Carta
         + cantidadCartas() : int
-        + getCartas() : List<Carta>
     }
 
     class FilaCentral <<Serializable>> {
@@ -98,7 +71,6 @@ package "Modelo" {
         + quitarCarta(int) : Carta
         + getCarta(int) : Carta
         + cantidadCartas() : int
-        + getCartas() : List<Carta>
     }
 
     class Jugador <<Serializable>> {
@@ -111,33 +83,36 @@ package "Modelo" {
         + getNombre() : String
         + getMano() : Mano
         + isDijoDos() : boolean
-        + setDijoDos(boolean) : void
+        ~ setDijoDos(boolean) : void
         + getCartasPenalizacionPendientes() : int
         + sinCartas() : boolean
         + tieneDosCartas() : boolean
         + robarCarta(Carta) : void
         + jugarCarta(int) : Carta
-        + agregarPenalizacion(int) : void
-        + limpiarPenalizacion() : void
+        ~ agregarPenalizacion(int) : void
+        ~ limpiarPenalizacion() : void
         + toString() : String
     }
 
     class ReglasDos {
-        + puedeHacerJugadaSimple(Carta, int) : boolean
-        + puedeHacerJugadaDoble(Carta, Carta, int) : boolean
-        + hayBonoColorSimple(Carta, ColorCarta) : boolean
-        + hayBonoColorDoble(Carta, Carta, ColorCarta) : boolean
+        ~ puedeHacerJugadaSimple(Carta, int) : boolean
+        ~ puedeHacerJugadaDoble(Carta, Carta, int) : boolean
+        ~ hayBonoColorSimple(Carta, ColorCarta) : boolean
+        ~ hayBonoColorDoble(Carta, Carta, ColorCarta) : boolean
         - coincideColor(ColorCarta, ColorCarta) : boolean
     }
 
     class GestorPenalizacionesDos {
-        + acusarNoDijoDos(Jugador) : boolean
-        + aplicarPenalizacionPendiente(Jugador, Mazo) : void
+        ~ acusarNoDijoDos(Jugador) : boolean
+        ~ aplicarPenalizacionPendiente(Jugador, Mazo) : void
     }
 
     interface IJuegoDos {
         + iniciarNuevaPartida(int) : void
-        + iniciarNuevaPartidaConNombres(List<String>) : void
+        + registrarCliente() : int
+        + configurarMaxJugadores(int) : void
+        + getMaxJugadores() : int
+        + agregarJugador(String) : void
         + getJugadores() : List<Jugador>
         + getFilaCentral() : FilaCentral
         + getJugadorActual() : Jugador
@@ -168,6 +143,8 @@ package "Modelo" {
         - jugadores : List<Jugador>
         - indiceJugadorActual : int
         - ganador : Jugador
+        - maxJugadoresEsperados : int = 0
+        - clientesListos : int = 0
         - reglas : ReglasDos
         - gestorPenalizaciones : GestorPenalizacionesDos
         - gestorPersistencia : GestorPersistencia
@@ -177,7 +154,7 @@ package "Modelo" {
         - ponerEnDescarte(Carta) : void
         - actualizarEstadoDos(Jugador) : void
         - registrarVictoriaSiCorresponde(Jugador) : void
-        + <<Implementación de los 22 métodos de IJuegoDos>>
+        + <<Implementación de los 25 métodos de IJuegoDos>>
     }
 }
 
@@ -227,7 +204,7 @@ package "Vista" {
         + mostrarMensaje(String) : void
         + mostrarEstado(List<Jugador>, FilaCentral, Jugador, Jugador, int) : void
         + pedirCantidadJugadores() : int
-        + pedirNombresJugadores(int) : List<String>
+        + pedirNombreJugador(int) : String
         + preguntarSiCargarPartida() : boolean
         + pedirNombreArchivoPartida() : String
         + mostrarRankingTop5(List<RegistroRanking>) : void
@@ -257,7 +234,7 @@ package "Vista" {
         - mostrarManoConIndices(Jugador) : void
         - mostrarFilaCentralConIndices(FilaCentral) : void
         - describirCarta(Carta) : String
-        + <<Implementación de todos los métodos de VistaJuego>>
+        + <<Implementación de los 22 métodos de VistaJuego>>
     }
 
     class VistaSwing {
@@ -298,7 +275,7 @@ package "Vista" {
         - pedirEntero(String, int, int) : int
         - pedirSiNo(String) : boolean
         - elegirOpcion(String, String, String[]) : int
-        + <<Implementación de todos los métodos de VistaJuego>>
+        + <<Implementación de los 22 métodos de VistaJuego>>
     }
 }
 
@@ -397,12 +374,11 @@ PartidaGuardada --> "*" Carta : descarte
 PartidaGuardada --> "1" Jugador : ganador
 
 ' ==========================================
-' RELACIONES DE USO DE MAIN
+' RELACIONES DE MAIN
 ' ==========================================
 ClienteDosMain ..> ControladorJuego : instancia
 ClienteDosMain ..> VistaConsola : instancia
 ClienteDosMain ..> VistaSwing : instancia
-
 ServidorDosMain ..> JuegoDos : instancia
 
 @enduml

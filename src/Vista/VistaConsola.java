@@ -107,17 +107,13 @@ public class VistaConsola implements VistaJuego {
     }
 
     @Override
-    public List<String> pedirNombresJugadores(int cantidadJugadores) {
-        List<String> nombres = new ArrayList<>();
-        for (int i = 0; i < cantidadJugadores; i++) {
-            String nombre;
-            do {
-                System.out.print("Ingrese nombre del jugador " + (i + 1) + ": ");
-                nombre = leerLinea();
-            } while (nombre.isEmpty());
-            nombres.add(nombre);
-        }
-        return nombres;
+    public String pedirNombreJugador(int numeroJugador) {
+        String nombre;
+        do {
+            System.out.print("Ingrese su nombre (Jugador " + numeroJugador + "): ");
+            nombre = leerLinea();
+        } while (nombre.isEmpty());
+        return nombre;
     }
 
     @Override

@@ -18,7 +18,8 @@ public class JuegoDos extends ObservableRemoto implements IJuegoDos {
     private Jugador ganador;
     private ReglasDos reglas;
     private GestorPenalizacionesDos gestorPenalizaciones;
-
+    private int maxJugadoresEsperados = 0;
+    private int clientesListos = 0;
     private final GestorPersistencia gestorPersistencia;
 
     public JuegoDos() throws RemoteException {
@@ -41,6 +42,51 @@ public class JuegoDos extends ObservableRemoto implements IJuegoDos {
             nombres.add("Jugador " + i);
         }
         iniciarNuevaPartidaConNombres(nombres);
+    }
+    @Override
+    public synchronized int registrarCliente() throws RemoteException {
+        int indice = clientesListos;
+        clientesListos++;
+        return indice;
+    }
+
+    @Override
+    public void configurarMaxJugadores(int max) throws RemoteException {
+        this.maxJugadoresEsperados = max;
+    }
+
+    @Override
+    public int getMaxJugadores() throws RemoteException {
+        return this.maxJugadoresEsperados;
+    }
+
+    @Override
+    public void agregarJugador(String nombre) throws RemoteException {
+        jugadores.add(new Jugador(nombre));
+
+        // Si ya llegamos a la cantidad esperada, repartimos cartas y el juego arranca
+        if (maxJugadoresEsperados > 0 && jugadores.size() == maxJugadoresEsperados) {
+            mazo = new Mazo();
+            descarte.clear();
+            filaCentral = new FilaCentral();
+            ganador = null;
+            indiceJugadorActual = 0;
+
+            for (Jugador j : jugadores) {
+                for (int k = 0; k < 7; k++) {
+                    robarCarta(j);
+                }
+            }
+
+            asegurarFilaCentralMinima();
+
+            for (Jugador j : jugadores) {
+                j.setDijoDos(false);
+                j.limpiarPenalizacion();
+            }
+
+            notificarObservadores(EventoJuego.PARTIDA_INICIADA);
+        }
     }
 
     @Override
@@ -392,6 +438,7 @@ public class JuegoDos extends ObservableRemoto implements IJuegoDos {
         this.descarte           = new ArrayList<>(partida.getDescarte());
         this.filaCentral        = partida.getFilaCentral();
         this.jugadores          = new ArrayList<>(partida.getJugadores());
+        this.maxJugadoresEsperados = this.jugadores.size();
         this.indiceJugadorActual = partida.getIndiceJugadorActual();
         this.ganador            = partida.getGanador();
         this.reglas             = new ReglasDos();
